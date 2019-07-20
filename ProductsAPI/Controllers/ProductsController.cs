@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using ProductsAPI.Models;
 using ProductsAPI.Services;
@@ -24,9 +25,13 @@ namespace ProductsAPI.Controllers
                 var result = _productRepository.Select(id);
                 return Ok(result);
             }
-            catch(Exception e)
+            catch (FileNotFoundException)
             {
                 return NotFound();
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e);
             }
         }
 
@@ -45,21 +50,11 @@ namespace ProductsAPI.Controllers
                 return Ok(product.Id);
                 
             }
-            catch (ArgumentNullException ex)
-            {
-                return NotFound(ex);
-            }
             catch (Exception ex)
             {
                 return BadRequest(ex);
             }
         }
-
-        // POST api/values
-        // [HttpPost]
-        // public void Post([FromBody]Product value)
-        // {
-        // }
 
     }
 }
