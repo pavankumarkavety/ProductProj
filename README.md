@@ -12,7 +12,7 @@
 
 ### Solution
 
-Solution contains Web API project
+Solution contains Web API and Test Project
 
 
 
