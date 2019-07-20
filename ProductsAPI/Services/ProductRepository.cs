@@ -1,23 +1,25 @@
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using ProductsAPI.Application.Models;
+using ProductsAPI.Models;
 
-namespace ProductsAPI.Application.Services
+namespace ProductsAPI.Services
 {
     public class ProductRepository : IProductRepository
     {
+        
         public void Insert(Product obj)
         {
-            var fileNames = Directory.GetFiles(string.Format("{0}{1}",System.Environment.CurrentDirectory,@"\assets\products\")).OrderByDescending(f => f);
+            var fileNames = Directory.GetFiles(string.Format("{0}{1}",GetApplicationRoot(),@"\assets\products\")).OrderByDescending(f => f);
 
             string id = Path.GetFileNameWithoutExtension(fileNames.ToList()[0]);
 
             obj.Id = int.Parse(id)+1;
             // if (fileNames.Count > 0)
             //     productid = fileNames[0];
-            using (StreamWriter file = File.CreateText(string.Format("{0}{1}{2}.json",System.Environment.CurrentDirectory,@"\assets\products\", obj.Id)))
+            using (StreamWriter file = File.CreateText(string.Format("{0}{1}{2}.json",GetApplicationRoot(),@"\assets\products\", obj.Id)))
             {
                 JsonSerializer serializer = new JsonSerializer();
                 //serialize object directly into file stream
@@ -38,23 +40,23 @@ namespace ProductsAPI.Application.Services
 
         public Product Select(int id)
         {
-            //JObject o1 = JObject.Parse(File.ReadAllText(@"c:\videogames.json"));
-
-            // read JSON directly from a file
-            // using (StreamReader file = File.OpenText(@"C:\Work\Apps\ProductsProj\ProductsAPI\assets\products\1.json"))
-            // using (JsonTextReader reader = new JsonTextReader(file))
-            // {
-            // JObject o2 = (JObject) JToken.ReadFrom(reader);
-            // }
-            
-
-            
-            using (StreamReader r = new StreamReader(string.Format("{0}{1}{2}.json",System.Environment.CurrentDirectory,@"\assets\products\",id)))
+            using (StreamReader r = new StreamReader(string.Format("{0}{1}{2}.json", GetApplicationRoot(),@"\assets\products\",id)))
             {
                 var json = r.ReadToEnd();
                 return JsonConvert.DeserializeObject<Product>(json);
                 
             }
+        }
+
+        public string GetApplicationRoot()
+        {
+            var exePath =   Path.GetDirectoryName(System.Reflection
+                            .Assembly.GetExecutingAssembly().CodeBase);
+            Regex appPathMatcher=new Regex(@"(?<!fil)[A-Za-z]:\\+[\S\s]*?(?=\\+bin)");
+            var appRoot = appPathMatcher.Match(exePath).Value;
+            if(appRoot.Contains("ProductsTest"))
+                appRoot = appRoot.Replace("ProductsTest","ProductsAPI");
+            return appRoot;
         }
     }
 }

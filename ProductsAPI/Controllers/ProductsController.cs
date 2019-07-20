@@ -1,7 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
-using ProductsAPI.Application.Models;
-using ProductsAPI.Application.Services;
+using ProductsAPI.Models;
+using ProductsAPI.Services;
 
 namespace ProductsAPI.Controllers
 {
@@ -10,7 +10,6 @@ namespace ProductsAPI.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductRepository _productRepository;
-
         public ProductsController(IProductRepository productRepository)
         {
             _productRepository = productRepository;
@@ -22,16 +21,12 @@ namespace ProductsAPI.Controllers
             try
             {
                 
-                Product product = _productRepository.Select(id);
-                if (product == null)
-                {
-                    return NotFound("Product does not exist");
-                }
-                return Ok(product);
+                var result = _productRepository.Select(id);
+                return Ok(result);
             }
             catch(Exception e)
             {
-                return BadRequest("Error while retrieving product: " + e.Message);
+                return NotFound();
             }
         }
 
@@ -42,8 +37,12 @@ namespace ProductsAPI.Controllers
             {
                 // _productService.Post<ProductValidator>(product);
                 // return  Ok(product.Id);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
                  _productRepository.Insert(product);
-                return Ok("sdf");
+                return Ok(product.Id);
                 
             }
             catch (ArgumentNullException ex)
